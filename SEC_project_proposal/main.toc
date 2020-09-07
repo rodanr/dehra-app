@@ -18,6 +18,7 @@
 \contentsline {subsection}{\numberline {3.2.5}React Js.}{6}%
 \contentsline {subsection}{\numberline {3.2.6}Flutter}{6}%
 \contentsline {subsection}{\numberline {3.2.7}PostgreSQL}{6}%
+\contentsline {subsection}{\numberline {3.2.8}SQLAlchemy}{7}%
 \contentsline {section}{\numberline {3.3}Block Diagram}{7}%
 \contentsline {section}{\numberline {3.4}Algorithm}{8}%
 \contentsline {chapter}{\numberline {4}FEASIBILITY STUDY}{10}%

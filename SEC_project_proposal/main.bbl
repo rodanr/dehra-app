@@ -1,14 +1,20 @@
 \begin{thebibliography}{1}
 
 \bibitem{householdsurvey}
-Nepal Central Bureau~of Statistics.
+Central~Bureau of~Statistics~Nepal.
 \newblock Annual household survey 2016/2017.
 \newblock Technical Report~3, 2019.
-
-\bibitem{houserent}
-Renting out house.
+\\
+https://cbs.gov.np/wp-content/upLoads/2019/01/Annual-Household-Survey-2016\_17.pdf
 
 \bibitem{agile}
 Agile method(sdlc).
+\\
+https://partheniumprojects.com/home-renting-system/
+
+\bibitem{houserent}
+Renting out house. 
+\\
+https://partheniumprojects.com/home-renting-system/
 
 \end{thebibliography}
