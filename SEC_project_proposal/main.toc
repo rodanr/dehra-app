@@ -1,0 +1,32 @@
+\contentsline {chapter}{ABSTRACT}{i}%
+\contentsline {chapter}{TABLE OF CONTENTS}{ii}%
+\contentsline {chapter}{LIST OF FIGURES}{iv}%
+\contentsline {chapter}{LIST OF ABBREVIATIONS}{v}%
+\contentsline {chapter}{\numberline {1}INTRODUCTION}{1}%
+\contentsline {section}{\numberline {1.1}Background }{1}%
+\contentsline {section}{\numberline {1.2}Problem Definition}{1}%
+\contentsline {section}{\numberline {1.3}Problem Solution}{1}%
+\contentsline {section}{\numberline {1.4}Objectives}{2}%
+\contentsline {chapter}{\numberline {2}LITERATURE REVIEW}{3}%
+\contentsline {chapter}{\numberline {3}METHODOLOGY}{4}%
+\contentsline {section}{\numberline {3.1}Process Model}{4}%
+\contentsline {section}{\numberline {3.2}Tools to be used}{5}%
+\contentsline {subsection}{\numberline {3.2.1}Android}{5}%
+\contentsline {subsection}{\numberline {3.2.2}Android Studio}{5}%
+\contentsline {subsection}{\numberline {3.2.3}VSCode}{5}%
+\contentsline {subsection}{\numberline {3.2.4}Flask}{6}%
+\contentsline {subsection}{\numberline {3.2.5}React Js.}{6}%
+\contentsline {subsection}{\numberline {3.2.6}Flutter}{6}%
+\contentsline {subsection}{\numberline {3.2.7}PostgreSQL}{6}%
+\contentsline {section}{\numberline {3.3}Block Diagram}{7}%
+\contentsline {section}{\numberline {3.4}Algorithm}{8}%
+\contentsline {chapter}{\numberline {4}FEASIBILITY STUDY}{10}%
+\contentsline {section}{\numberline {4.1}Technical Feasibility}{10}%
+\contentsline {subsection}{\numberline {4.1.1}PC}{10}%
+\contentsline {subsection}{\numberline {4.1.2}Android}{10}%
+\contentsline {section}{\numberline {4.2}Economic Feasibility}{11}%
+\contentsline {section}{\numberline {4.3}Time Feasibility}{11}%
+\contentsline {section}{\numberline {4.4}Operational Feasibility}{11}%
+\contentsline {chapter}{\numberline {5}WORK SCHEDULE}{12}%
+\contentsline {chapter}{\numberline {6}EXPECTED OUTPUT}{14}%
+\contentsline {chapter}{REFERENCES}{15}%
