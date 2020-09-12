@@ -1,0 +1,6 @@
+Flask-RESTful
+Flask-SQLAlchemy
+Flask-JWT
+flask-marshmallow
+marshmallow-sqlalchemy
+
