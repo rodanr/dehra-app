@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang ='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Chatting</title>
+</head>
+<body>
+    <h1>Welcome to chat room {{ room }}</h1>
+
+    <div id="messages"></div>
+    <div id ="typing"></div>
+
+    <form id="message_input_form">
+        <input type="text" id = "message_input" placeholder="Enter Your Message Here" autofocus autocomplete="off">
+        <button type="submit">Send</button>
+    </form>
+</body>
+<style>
+    #messages{
+        width:400px;
+        height:200px;
+        overflow:scroll;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script>
+    const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);    // Connecting to socket io to the domain with configured protocol
+    i = 0;  // For Message counting while refreshing
+    j = 0;  // For checking if typing as been shown or not
+    socket.on('connect', function (){   // When connected run this function
+            socket.emit('joined_room',{ //triggers joined_room event and passes username and room
+                username:"{{ username }}",
+                room: "{{ room }}"
+        });
+    let message_input = document.getElementById('message_input');   //takes element of chatting input
+    message_input.addEventListener("keyup", function(){     // checks if key is pressed for typing status
+        inputValue = document.getElementById('message_input').value;    //gets the element for typing status
+        socket.emit('typing_status', inputValue);   // triggers event typing_status with the inputValue
+    })
+    socket.on("typing_on", function(data){  // When backend envokes typing on event this function runs
+        if(data.length==1 || j == 0){   //check if anything is written and if it has been written with j flag
+            const newNode = document.createElement('div');  // Create a new div element
+            newNode.innerHTML = `Typing...`;    // Insert Typing inside that div element
+            document.getElementById("typing").appendChild(newNode); // Append the div created inside the typing id's div
+            j++;    // change the flag so that typing status is not added again and again
+        }
+        if(data.length==0){
+            // Checks if nothing is written inside and removes typing...
+            document.getElementById("typing").innerHTML = '';
+            j=0;    // Resets the flag
+        }
+    })
+    document.getElementById('message_input_form').onsubmit = function (e) { // When send button is pressed this function runs
+        e.preventDefault(); // Prevents default request of sending post or get request
+        let message = message_input.value.trim();   // Removes all the unnecessary spaces
+        if (message.length){
+            // If there is message then it envokes send_message event with username, room and message
+            socket.emit('send_message',{
+                username: "{{ username }}",
+                room: "{{ room }}",
+                message: message
+            })
+        };
+        message_input.value = "";   // Clear the input
+        message_input.focus();  // Put the input box to focus for typing again
+
+        // Reset typing status
+        inputValue = document.getElementById('message_input').value;
+        socket.emit('typing_status', inputValue);
+    }
+    });
+
+    function updateScroll(){
+        // While putting scroll bar on webpages it focuses on the object on the bottom of the scrollbar i.e. new messages
+        var element = document.getElementById("messages");
+        element.scrollTop = element.scrollHeight;
+    }
+    socket.on('recieve_message', function (data){   // Frontend recieve_message envoked
+        // Inserts new message
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data.username}: &nbsp;</b> ${data.message}`;
+        document.getElementById("messages").appendChild(newNode);
+        updateScroll();
+
+    })
+
+    socket.on('rejoin_room', function (data){ // Frontend rejoin_room envoked
+        // previous messages restored
+        total_message = data.length;
+        while(i<total_message){
+            const newNode = document.createElement('div');
+            newNode.innerHTML = `<b>${data[i][1]}: &nbsp;</b> ${data[i][2]}`;
+            document.getElementById("messages").appendChild(newNode);
+            i++;
+        }
+        updateScroll();
+    })
+
+    socket.on('join_room_announcement', function (data){    // Frontend join_room_announcement
+        // when room is joined this function runs. Can be used as a seen status
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data.username}</b> is now online.`;
+        document.getElementById("messages").appendChild(newNode);
+        updateScroll();
+    })
+</script>
+</html>
