@@ -1,7 +1,0 @@
-Flask-RESTful
-Flask-SQLAlchemy
-Flask-JWT
-flask-marshmallow
-marshmallow-sqlalchemy
-Flask~=1.1.2
-Werkzeug~=1.0.1
