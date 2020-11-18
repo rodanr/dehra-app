@@ -17,6 +17,7 @@ class AdvertisementModel(db.Model):
     )  # Geographical location of property i.e lat & long
     room_count = db.Column(db.Integer, nullable=False)  # Number of rooms
     price = db.Column(db.Float, nullable=False)  # Price of the property
+    photo = db.Column(db.String, nullable=False)
     description = db.Column(
         db.String, nullable=False
     )  # Description about the property owner wants to tell
@@ -32,6 +33,7 @@ class AdvertisementModel(db.Model):
         geo_location,
         room_count,
         price,
+        photo,
         description,
         water_source,
         bathroom,
@@ -43,6 +45,7 @@ class AdvertisementModel(db.Model):
         self.geo_location = geo_location
         self.room_count = room_count
         self.price = price
+        self.photo = photo
         self.description = description
         self.water_source = water_source
         self.bathroom = bathroom
