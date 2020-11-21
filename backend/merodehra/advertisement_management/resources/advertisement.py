@@ -86,29 +86,30 @@ class PostAdvertisement(Resource):
             "description": description,
             "water_source": water_source,
             "bathroom": bathroom,
-            "terrace_access": bool(terrace_access)
+            "terrace_access": bool(terrace_access),
+            "image": {
+                "advertisement_id": user_id,
+                "image_1": img[0],
+                "image_2": img[1],
+                "image_3": img[2],
+                "image_4": img[3],
+                "image_5": img[4],
+                "image_6": img[5],
+                "image_7": img[6]
+            }
         }
-        image_json = {
-            "advertisement_id": user_id,
-            "image_1": img[0],
-            "image_2": img[1],
-            "image_3": img[2],
-            "image_4": img[3],
-            "image_5": img[4],
-            "image_6": img[5],
-            "image_7": img[6]
-        }
-        image_json = json.dumps(image_json)
+
+        image_json = json.dumps(advertisement_json)
         image_data = image_schema.load(image_json)
         ad_image = ImageModel(
-            image_data["advertisement_id"],
-            image_data["image_1"],
-            image_data["image_2"],
-            image_data["image_3"],
-            image_data["image_4"],
-            image_data["image_5"],
-            image_data["image_6"],
-            image_data["image_7"],
+            image_data["image"]["advertisement_id"],
+            image_data["image"]["image_1"],
+            image_data["image"]["image_2"],
+            image_data["image"]["image_3"],
+            image_data["image"]["image_4"],
+            image_data["image"]["image_5"],
+            image_data["image"]["image_6"],
+            image_data["image"]["image_7"],
         )
         ad_image.save_to_db()
 
