@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, send_file
 import json, os, datetime
 from werkzeug.utils import secure_filename
 from advertisement_management.models.advertisement import AdvertisementModel
@@ -43,7 +43,7 @@ class PostAdvertisement(Resource):
             "geo_location" : geo_location,
             "room_count" : room_count,
             "price" : float(price.split(",")[0]),
-            "photo" : filename_and_location,
+            "photo" : newfilename,
             "description" : description,
             "water_source" : water_source,
             "bathroom" : bathroom,
@@ -107,6 +107,13 @@ class GetAdvertisementLists(Resource):
             )
 
         return {"advertisement_list": advertisements_found}, 200
+class GetFile(Resource):
+    @classmethod
+    def get(cls, file_name):
+
+        forMimetype = 'image/'+file_name.split('.')[-1] 
+
+        return send_file(os.path.join("E:/dehra-app/backend/merodehra/advertisement_management/resources/uploaded_files/",file_name), mimetype=forMimetype)
 
 
 class GetSingleAdvertisement(Resource):
@@ -120,7 +127,6 @@ class GetSingleAdvertisement(Resource):
             "geo_location": advertisement.geo_location,
             "room_count": advertisement.room_count,
             "price": advertisement.price,
-            "photo": advertisement.photo,
             "description": advertisement.description,
             "water_source": advertisement.water_source,
             "bathroom": advertisement.bathroom,
@@ -141,7 +147,6 @@ class GetAdvertisementListsByUserId(Resource):
                     "price": advertisement.price,
                     "property_type": advertisement.property_type,
                     "property_address": advertisement.property_address,
-                    "photo": advertisement.photo,
                     "room_count": advertisement.room_count,
                     "user_id": advertisement.user_id,
                     "username": advertisement.user.username,

@@ -42,14 +42,23 @@ class UserSignUp(Resource):
             generate_password_hash(user_data_for_sign_up["password"]),
         )
         if UserModel.find_by_username(user.username):
-            return {"message": USER_ALREADY_EXISTS}, 400
+            return {"message": USER_ALREADY_EXISTS, "erroron": "user"}, 400
         if UserModel.find_by_mobile_number(user.mobile_number):
-            return {"message": "Mobile Number Already Registered"}, 400
+            return {"message": "Mobile Number Already Registered","erroron": "phone"}, 400
         if UserModel.find_by_email(user.email):
-            return {"message": "Email Already Registered"}, 400
+            return {"message": "Email Already Registered", "erroron": "email"}, 400
         user.save_to_db()
         return {"message": CREATED_SUCCESSFULLY}, 200
 
+class UserAllData(Resource):
+    @classmethod
+    def get(cls, username_recieve):
+        user = UserModel.find_by_username(username_recieve)
+        return {
+            "userid": user.id,
+            "username": username_recieve,
+            "email": user.email
+        }, 200
 
 class UserLogin(Resource):
     @classmethod
