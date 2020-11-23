@@ -77,7 +77,25 @@ class PostAdvertisement(Resource):
         )
         return {"message": "Advertisement Successfully added"}, 200
 
-
+class getAllAdsData(Resource):
+    @classmethod
+    def get(cls, number_needed):
+        advertisement_list = AdvertisementModel.get_all_desc(number_needed)
+        advertisements_found = []
+        for advertisement in advertisement_list:
+            advertisements_found.append(
+                {
+                    "advertisement_id": advertisement.id,
+                    "price": advertisement.price,
+                    "property_type": advertisement.property_type,
+                    "property_address": advertisement.property_address,
+                    "photo": advertisement.photo,
+                    "room_count": advertisement.room_count,
+                    "user_id": advertisement.user_id,
+                    "username": advertisement.user.username,
+                }
+            )
+        return {"advertisement_list": advertisements_found}, 200
 class GetAdvertisementLists(Resource):
     @classmethod
     def get(cls, location_to_search):
@@ -144,11 +162,17 @@ class GetAdvertisementListsByUserId(Resource):
             advertisements_found.append(
                 {
                     "advertisement_id": advertisement.id,
-                    "price": advertisement.price,
+                    "user_id": advertisement.user_id,
                     "property_type": advertisement.property_type,
                     "property_address": advertisement.property_address,
+                    "geo_location": advertisement.geo_location,
                     "room_count": advertisement.room_count,
-                    "user_id": advertisement.user_id,
+                    "price": advertisement.price,
+                    "photo": advertisement.photo,
+                    "description": advertisement.description,
+                    "water_source": advertisement.water_source,
+                    "bathroom": advertisement.bathroom,
+                    "terrace_access": advertisement.terrace_access,
                     "username": advertisement.user.username,
                 }
             )

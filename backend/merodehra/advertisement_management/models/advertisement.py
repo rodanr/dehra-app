@@ -52,6 +52,10 @@ class AdvertisementModel(db.Model):
         self.terrace_access = terrace_access
 
     @classmethod
+    def get_all_desc(cls, number_needed: int) -> list:
+        return cls.query.order_by(cls.id.desc()).limit(number_needed).all()
+
+    @classmethod
     def find_by_id(cls, advertisement_id: int) -> "AdvertisementModel":
         return cls.query.filter_by(id=advertisement_id).first()
 
