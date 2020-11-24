@@ -1,5 +1,6 @@
 from ma import ma
-from advertisement_management.models.advertisement import AdvertisementModel
+from advertisement_management.models.advertisement import AdvertisementModel, ImageModel, ChatUserModel, \
+    ChatMessageModel
 
 
 class AdvertisementSchema(ma.SQLAlchemyAutoSchema):
@@ -13,3 +14,24 @@ class AdvertisementSchema(ma.SQLAlchemyAutoSchema):
 class SearchAdvertisementSchema(ma.Schema):
     class Meta:
         fields = ("location_to_search",)
+
+
+class ImageSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ImageModel
+        dump_only = ("advertisement_id",)
+        include_fk = True
+
+
+class ChatUserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ChatUserModel
+        dump_only = ("id",)
+        include_fk = True
+
+
+class ChatMessageSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ChatMessageModel
+        dump_only = ("id",)
+        include_fk = True
