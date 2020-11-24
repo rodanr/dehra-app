@@ -43,5 +43,9 @@ api.add_resource(PostAdvertisement, "/advertisement")
 api.add_resource(GetAdvertisementLists, "/search/<string:location_to_search>")
 api.add_resource(GetSingleAdvertisement, "/advertisement/<int:advertisement_id>")
 api.add_resource(GetAdvertisementListsByUserId, "/advertisement/user/<int:user_id>")
+api.add_resource(PostChatId, "/chat_id")
+api.add_resource(ChatMessage, "/message")
+api.add_resource(ChatMessage, "/getMessage/<int:room_id>", endpoint="/message")
+
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
