@@ -1,21 +1,27 @@
 import datetime
 import json
 import os
-from flask import request, make_response, render_template, redirect
+from flask import request, make_response, render_template
+from sqlalchemy import desc
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
 
-from advertisement_management.models.advertisement import AdvertisementModel, ImageModel
+from advertisement_management.models.advertisement import AdvertisementModel, ImageModel, ChatUserModel, \
+    ChatMessageModel
 from advertisement_management.schemas.advertisement import (
     AdvertisementSchema,
     SearchAdvertisementSchema,
     ImageSchema,
+    ChatUserSchema,
+    ChatMessageSchema
 )
 
 # Instances of schema
 advertisement_schema = AdvertisementSchema()
 search_advertisement_schema = SearchAdvertisementSchema()
 image_schema = ImageSchema()
+chat_user_schema = ChatUserSchema()
+chat_message_schema = ChatMessageSchema()
 
 ALLOWED_EXTENSION = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -63,7 +69,7 @@ class PostAdvertisement(Resource):
         for image in uploaded_images:
             if image and allowed_file(image.filename):
                 image_name = secure_filename(image.filename)
-                print(image_name)
+                # print(image_name)
                 extension = image_name.split('.')[-1]
                 image_name = datetime.datetime.now().strftime("%y%m%d_%H%M%S_%f")
                 newfilename = image_name + "." + extension
@@ -72,9 +78,9 @@ class PostAdvertisement(Resource):
                     os.makedirs(IMAGE_UPLOAD_FOLDER)
                 image_path = os.path.join(IMAGE_UPLOAD_FOLDER, newfilename)
                 img.append(image_name)
-                print(image_path)
+                # print(image_path)
                 image.save(image_path)
-        print(img)
+        # print(img)
 
         advertisement_json = {
             "user_id": user_id,
@@ -122,7 +128,6 @@ class PostAdvertisement(Resource):
             advertisement_data["geo_location"],
             advertisement_data["room_count"],
             advertisement_data["price"],
-            advertisement_data["photo"],
             advertisement_data["description"],
             advertisement_data["water_source"],
             advertisement_data["bathroom"],
@@ -163,7 +168,6 @@ class GetAdvertisementLists(Resource):
                     "price": advertisement.price,
                     "property_type": advertisement.property_type,
                     "property_address": advertisement.property_address,
-                    "photo": advertisement.photo,
                     "room_count": advertisement.room_count,
                     "user_id": advertisement.user_id,
                     "username": advertisement.user.username,
@@ -188,7 +192,6 @@ class GetSingleAdvertisement(Resource):
                    "geo_location": advertisement.geo_location,
                    "room_count": advertisement.room_count,
                    "price": advertisement.price,
-                   "photo": advertisement.photo,
                    "description": advertisement.description,
                    "water_source": advertisement.water_source,
                    "bathroom": advertisement.bathroom,
@@ -209,10 +212,53 @@ class GetAdvertisementListsByUserId(Resource):
                     "price": advertisement.price,
                     "property_type": advertisement.property_type,
                     "property_address": advertisement.property_address,
-                    "photo": advertisement.photo,
                     "room_count": advertisement.room_count,
                     "user_id": advertisement.user_id,
                     "username": advertisement.user.username,
                 }
             )
         return {"advertisement_list": advertisements_found}, 200
+
+
+class PostChatId(Resource):
+    @classmethod
+    def post(cls):
+        chat_id_json = request.get_json()
+        chat_id_data = chat_user_schema.load(chat_id_json)
+        if ChatUserModel.find_owner_id(chat_id_data["owner_id"]) and ChatUserModel.find_renter_id(
+                chat_id_data["renter_id"]):
+            user_id = ChatUserModel.get_id(chat_id_data["owner_id"], chat_id_data["renter_id"])
+            return {"chat_user_id": user_id}
+        else:
+            chat_id = ChatUserModel(
+                chat_id_data["owner_id"],
+                chat_id_data["renter_id"],
+            )
+            chat_id.save_to_db()
+            return {"message": "Successfully add chat id"}
+
+
+class ChatMessage(Resource):
+    @classmethod
+    def post(cls):
+        chat_message_json = request.get_json()
+        chat_message_data = chat_message_schema.load(chat_message_json)
+        chat_message = ChatMessageModel(
+            chat_message_data["message"],
+            chat_message_data["room_id"]
+        )
+        chat_message.save_to_db()
+        return {"message": "successfully added"}
+
+    @classmethod
+    def get(cls, room_id):
+        message_list = ChatMessageModel.order_message_dec(room_id)
+        message_found = []
+        for message in message_list:
+            message_found.append(
+                {
+                    "message": message.message,
+                }
+            )
+        print(message_found)
+        return message_found
