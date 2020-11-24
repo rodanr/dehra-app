@@ -60,6 +60,16 @@ class UserAllData(Resource):
             "email": user.email
         }, 200
 
+class UserAllDataById(Resource):
+    @classmethod
+    def get(cls, id):
+        user = UserModel.find_by_id(id)
+        return {
+            "userid": id,
+            "username": user.username,
+            "email": user.email
+        }, 200
+
 class UserLogin(Resource):
     @classmethod
     def post(cls):

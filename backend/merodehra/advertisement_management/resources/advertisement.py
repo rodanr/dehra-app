@@ -2,16 +2,19 @@ from flask_restful import Resource
 from flask import request, send_file
 import json, os, datetime
 from werkzeug.utils import secure_filename
-from advertisement_management.models.advertisement import AdvertisementModel
+from advertisement_management.models.advertisement import AdvertisementModel, ChatMessageModel, ChatUserModel
 from advertisement_management.schemas.advertisement import (
     AdvertisementSchema,
     SearchAdvertisementSchema,
+    ChatUserSchema,
+    ChatMessageSchema,
 )
 
 # Instances of schema
 advertisement_schema = AdvertisementSchema()
 search_advertisement_schema = SearchAdvertisementSchema()
-
+chat_user_schema = ChatUserSchema()
+chat_message_schema = ChatMessageSchema()
 
 class PostAdvertisement(Resource):
     @classmethod
@@ -91,6 +94,10 @@ class getAllAdsData(Resource):
                     "property_address": advertisement.property_address,
                     "photo": advertisement.photo,
                     "room_count": advertisement.room_count,
+                    "description": advertisement.description,
+                    "water_source": advertisement.water_source,
+                    "bathroom": advertisement.bathroom,
+                    "terrace_access": advertisement.terrace_access,
                     "user_id": advertisement.user_id,
                     "username": advertisement.user.username,
                 }
@@ -119,6 +126,10 @@ class GetAdvertisementLists(Resource):
                     "property_address": advertisement.property_address,
                     "photo": advertisement.photo,
                     "room_count": advertisement.room_count,
+                    "description": advertisement.description,
+                    "water_source": advertisement.water_source,
+                    "bathroom": advertisement.bathroom,
+                    "terrace_access": advertisement.terrace_access,
                     "user_id": advertisement.user_id,
                     "username": advertisement.user.username,
                 }
@@ -177,3 +188,83 @@ class GetAdvertisementListsByUserId(Resource):
                 }
             )
         return {"advertisement_list": advertisements_found}, 200
+
+class PostChatId(Resource):
+    @classmethod
+    def post(cls):
+        chat_id_json = request.get_json()
+        print(chat_id_json)
+        chat_id_data = chat_user_schema.load(chat_id_json)
+        if ChatUserModel.find_owner_id(chat_id_data["owner_id"]) and ChatUserModel.find_renter_id(
+                chat_id_data["renter_id"]):
+            user_id = ChatUserModel.get_id(chat_id_data["owner_id"], chat_id_data["renter_id"])
+            return {"chat_user_id": user_id}, 200
+        else:
+            chat_id = ChatUserModel(
+                chat_id_data["owner_id"],
+                chat_id_data["renter_id"],
+            )
+            chat_id.save_to_db()
+            if ChatUserModel.find_owner_id(chat_id_data["owner_id"]) and ChatUserModel.find_renter_id(
+                chat_id_data["renter_id"]):
+                user_id = ChatUserModel.get_id(chat_id_data["owner_id"], chat_id_data["renter_id"])
+                return {"chat_user_id": user_id}, 200
+
+class getUsersByRoomId(Resource):
+    @classmethod
+    def get(cls, room_id):
+        get_datas = ChatUserModel.get_users(room_id)
+        return {
+            "owner": get_datas.owner_id,
+            "renter": get_datas.renter_id
+        }, 200
+
+class ChatMessage(Resource):
+    @classmethod
+    def post(cls):
+        chat_message_json = request.get_json()
+        chat_message_data = chat_message_schema.load(chat_message_json)
+        chat_message = ChatMessageModel(
+            chat_message_data["message"],
+            chat_message_data["sent_user"],
+            chat_message_data["room_id"],
+        )
+        chat_message.save_to_db()
+        return {"message": "successfully added"}, 200
+
+
+class getMessageAll(Resource):
+    @classmethod
+    def get(cls, room_id):
+        message_list = ChatMessageModel.order_message_dec(room_id)
+        message_found = []
+        for message in message_list:
+            message_found.append(
+                {
+                    "username": message.sent_user,
+                    "message": message.message,
+                }
+            )
+        print(message_found)
+        return {"message_index": message_found}, 200
+class ChatMessageAll(Resource):
+    @classmethod
+    def get(cls, user_id):
+        if ChatUserModel.find_owner_id(user_id) or ChatUserModel.find_renter_id(user_id):
+            room_id = ChatMessageModel.get_id(user_id)
+            return {"room_id": room_id}, 200
+        else:
+            return {"Message": "Not In Room"}, 404
+class ChatLatestMessage(Resource):
+    @classmethod
+    def get(cls, room_id):
+        if room_id:
+            latest_message = ChatMessageModel.get_latest_msg(room_id)
+            msg = []
+            msg.append(
+                {
+                    "latest_message": latest_message.message
+                }
+            )
+            # print(msg)
+            return msg
