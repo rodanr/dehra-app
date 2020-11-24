@@ -237,6 +237,23 @@ class PostChatId(Resource):
             chat_id.save_to_db()
             return {"message": "Successfully add chat id"}
 
+    @classmethod
+    def get(cls, user_id):
+        if ChatUserModel.find_owner_id(user_id) and ChatUserModel.find_renter_id(user_id):
+            room_id = ChatMessageModel.get_room_id(user_id)
+            return {"room_id": room_id}
+
+    @classmethod
+    def get(cls, room_id):
+        if room_id:
+            latest_message = ChatMessageModel.get_latest_msg(room_id)
+            print(latest_message)
+            msg = [{
+                "latest_message": latest_message.message
+            }]
+            # print(msg)
+            return msg
+
 
 class ChatMessage(Resource):
     @classmethod
@@ -260,5 +277,5 @@ class ChatMessage(Resource):
                     "message": message.message,
                 }
             )
-        print(message_found)
+        # print(message_found)
         return message_found
