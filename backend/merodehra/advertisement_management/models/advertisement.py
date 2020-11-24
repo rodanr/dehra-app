@@ -1,4 +1,5 @@
 from db import db
+from sqlalchemy import desc
 
 
 class AdvertisementModel(db.Model):
@@ -95,6 +96,54 @@ class ImageModel(db.Model):
         self.link_5 = link_5
         self.link_6 = link_6
         self.link_7 = link_7
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+
+class ChatUserModel(db.Model):
+    __tablename__ = "chatUser"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
+    owner_id = db.Column(db.Integer)
+    renter_id = db.Column(db.Integer)
+
+    def __init__(self, owner_id, renter_id):
+        self.owner_id = owner_id
+        self.renter_id = renter_id
+
+    @classmethod
+    def find_owner_id(cls, owner_id: int):
+        return cls.query.filter_by(owner_id=owner_id).first()
+
+    @classmethod
+    def find_renter_id(cls, renter_id: int):
+        return cls.query.filter_by(renter_id=renter_id).first()
+
+    @classmethod
+    def get_id(cls, owner_id, renter_id):
+        return cls.query.filter_by(owner_id=owner_id, renter_id=renter_id).first().id
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+
+class ChatMessageModel(db.Model):
+    __tablename__ = "chatMessage"
+
+    message_id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
+    message = db.Column(db.String())
+    room_id = db.Column(db.Integer, db.ForeignKey("chatUser.id"), nullable=False)
+
+    def __init__(self, message, room_id):
+        self.message = message
+        self.room_id = room_id
+
+    @classmethod
+    def order_message_dec(cls, id: int):
+        return cls.query.filter_by(room_id=id).order_by(cls.message_id.desc()).all()
 
     def save_to_db(self):
         db.session.add(self)
