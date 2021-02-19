@@ -9,13 +9,18 @@ class AdvertisementModel(db.Model):
     user_id = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False
     )  # user_id who created this advertisement
+    image_id = db.Column(db.Integer, db.ForeignKey("images.id"),
+                         nullable=False)  # images of advertsement posted by the user
     property_type = db.Column(db.String(10), nullable=False)  # Either its flat or room
     property_address = db.Column(
         db.String(100), nullable=False
     )  # Property's general address
-    geo_location = db.Column(
+    longitude = db.Column(
         db.String(100), nullable=False
     )  # Geographical location of property i.e lat & long
+    latitude = db.Column(
+        db.String(100), nullable=False
+    )
     room_count = db.Column(db.Integer, nullable=False)  # Number of rooms
     price = db.Column(db.Float, nullable=False)  # Price of the property
     description = db.Column(
@@ -28,9 +33,11 @@ class AdvertisementModel(db.Model):
     def __init__(
             self,
             user_id,
+            image_id,
             property_type,
             property_address,
-            geo_location,
+            longitude,
+            latitude,
             room_count,
             price,
             description,
@@ -39,9 +46,11 @@ class AdvertisementModel(db.Model):
             terrace_access,
     ):
         self.user_id = user_id
+        self.image_id = image_id
         self.property_type = property_type
         self.property_address = property_address
-        self.geo_location = geo_location
+        self.longitude = longitude
+        self.latitude = latitude
         self.room_count = room_count
         self.price = price
         self.description = description
@@ -66,6 +75,23 @@ class AdvertisementModel(db.Model):
             AdvertisementModel.property_address.ilike(location_to_search_string)
         ).all()
 
+    @classmethod
+    def get_images_by_image_id(cls, image_id: int):
+        result = db.session.query(AdvertisementModel, ImageModel).join(ImageModel).filter(
+            AdvertisementModel.image_id == image_id).all()
+        for ad, img in result:
+            images = {
+                "ad_user_id": ad.user_id,
+                "image_1": img.link_1,
+                "image_2": img.link_2,
+                "image_3": img.link_3,
+                "image_4": img.link_4,
+                "image_5": img.link_5,
+                "image_6": img.link_6,
+                "image_7": img.link_7,
+            }
+            return images
+
     def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
@@ -78,7 +104,7 @@ class AdvertisementModel(db.Model):
 class ImageModel(db.Model):
     __tablename__ = "images"
 
-    advertisement_id = db.Column(db.Integer, db.ForeignKey("advertisements.id"), primary_key=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     link_1 = db.Column(db.String)
     link_2 = db.Column(db.String)
     link_3 = db.Column(db.String)
@@ -86,9 +112,9 @@ class ImageModel(db.Model):
     link_5 = db.Column(db.String)
     link_6 = db.Column(db.String)
     link_7 = db.Column(db.String)
+    ad_user = db.relationship("AdvertisementModel", backref="adUser", lazy=True)
 
-    def __init__(self, advertisement_id, link_1, link_2, link_3, link_4, link_5, link_6, link_7):
-        self.advertisement_id = advertisement_id
+    def __init__(self, link_1, link_2, link_3, link_4, link_5, link_6, link_7):
         self.link_1 = link_1
         self.link_2 = link_2
         self.link_3 = link_3
@@ -100,6 +126,18 @@ class ImageModel(db.Model):
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+
+    def delete_from_db(self) -> None:
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def get_latest_images(cls):
+        return cls.query.order_by(cls.id.desc()).first()
+
+    @classmethod
+    def order_images_dec(cls):
+        return cls.query.order_by(cls.id.desc()).all()
 
 
 class ChatUserModel(db.Model):
