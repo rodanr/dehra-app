@@ -5,7 +5,6 @@ from flask import request, make_response, render_template
 from sqlalchemy import desc
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
-
 from advertisement_management.models.advertisement import AdvertisementModel, ImageModel, ChatUserModel, \
     ChatMessageModel
 from advertisement_management.schemas.advertisement import (
@@ -29,13 +28,47 @@ ALLOWED_EXTENSION = set(['png', 'jpg', 'jpeg', 'gif'])
 # Function to check weather the file to be uploaded is an image or not
 def allowed_file(filename):
     ext = filename.split('.')[-1]
-    # if ext.lower() in ALLOWED_EXTENSION:
-    #     print(True)
-    #
-    # return True
-
-    # returns TRUE if the extension is in the ALLOWED_EXTENSION
     return '.' in filename and ext.lower() in ALLOWED_EXTENSION
+
+
+class PostImages(Resource):
+    @classmethod
+    def post(cls):
+        uploaded_images = request.files.getlist("photo[]")
+        print(uploaded_images)
+        img = []
+        for image in uploaded_images:
+            if image and allowed_file(image.filename):
+                image_name = secure_filename(image.filename)
+                print(image_name)
+                extension = image_name.split('.')[-1]
+                image_name = datetime.datetime.now().strftime("%y%m%d_%H%M%S_%f")
+                newfilename = image_name + "." + extension
+                IMAGE_UPLOAD_FOLDER = os.path.dirname(os.path.realpath(__file__)) + "/pictures/"
+                if not os.path.isdir(IMAGE_UPLOAD_FOLDER):
+                    os.makedirs(IMAGE_UPLOAD_FOLDER)
+                image_path = os.path.join(IMAGE_UPLOAD_FOLDER, newfilename)
+                img.append(newfilename)
+                print(image_path)
+                image.save(image_path)
+        print(img)
+
+        ad_image = ImageModel(
+            img[0],
+            img[1],
+            img[2],
+            img[3],
+            img[4],
+            img[5],
+            img[6],
+        )
+        ad_image.save_to_db()
+
+        return {"Success_message":"Successfully uploaded the images!!!"}, 200
+
+    @classmethod
+    def get(cls):
+        return make_response(render_template('form.html'))
 
 
 class PostAdvertisement(Resource):
@@ -44,88 +77,43 @@ class PostAdvertisement(Resource):
         user_id = request.form["user_id"]
         property_type = request.form["property_type"]
         property_address = request.form["property_address"]
-        geo_location = request.form["geo_location"]
+        longitude = request.form["longitude"]
+        latitude = request.form["latitude"]
         room_count = request.form["room_count"]
         price = request.form["price"]
-        # photo = request.files["photo"]
         description = request.form["description"]
         water_source = request.form["water_source"]
         bathroom = request.form["bathroom"]
         terrace_access = request.form["terrace_access"]
-        # filename=secure_filename(photo.filename)
-        # extension = filename.split('.')[-1]
-        # filename = datetime.datetime.now().strftime("%y%m%d_%H%M%S_%f")
-        # newfilename = filename+"."+extension
-        # filelocation = os.path.dirname(os.path.realpath(__file__))+"/uploaded_files/"
-        # if not os.path.isdir(filelocation):
-        #     os.makedirs(filelocation)
-        # filename_and_location = os.path.join(filelocation ,newfilename)
-        # photo.save(filename_and_location)
 
-        # image upload section
-        uploaded_images = request.files.getlist("photos[]")
-        print(uploaded_images)
-        img = []
-        for image in uploaded_images:
-            if image and allowed_file(image.filename):
-                image_name = secure_filename(image.filename)
-                # print(image_name)
-                extension = image_name.split('.')[-1]
-                image_name = datetime.datetime.now().strftime("%y%m%d_%H%M%S_%f")
-                newfilename = image_name + "." + extension
-                IMAGE_UPLOAD_FOLDER = os.path.dirname(os.path.realpath(__file__)) + "/pictures/"
-                if not os.path.isdir(IMAGE_UPLOAD_FOLDER):
-                    os.makedirs(IMAGE_UPLOAD_FOLDER)
-                image_path = os.path.join(IMAGE_UPLOAD_FOLDER, newfilename)
-                img.append(image_name)
-                # print(image_path)
-                image.save(image_path)
-        # print(img)
+        # Gets the latest image_id posted
+        image_id = ImageModel.get_latest_images()
+        # ...
 
         advertisement_json = {
             "user_id": user_id,
+            "image_id": image_id.id,
             "property_type": property_type,
             "property_address": property_address,
-            "geo_location": geo_location,
+            "longitude": longitude,
+            "latitude": latitude,
             "room_count": room_count,
             "price": float(price.split(",")[0]),
             "description": description,
             "water_source": water_source,
             "bathroom": bathroom,
             "terrace_access": bool(terrace_access),
-            "image": {
-                "advertisement_id": user_id,
-                "image_1": img[0],
-                "image_2": img[1],
-                "image_3": img[2],
-                "image_4": img[3],
-                "image_5": img[4],
-                "image_6": img[5],
-                "image_7": img[6]
-            }
         }
-
-        image_json = json.dumps(advertisement_json)
-        image_data = image_schema.load(image_json)
-        ad_image = ImageModel(
-            image_data["image"]["advertisement_id"],
-            image_data["image"]["image_1"],
-            image_data["image"]["image_2"],
-            image_data["image"]["image_3"],
-            image_data["image"]["image_4"],
-            image_data["image"]["image_5"],
-            image_data["image"]["image_6"],
-            image_data["image"]["image_7"],
-        )
-        ad_image.save_to_db()
 
         advertisement_json = json.dumps(advertisement_json)
         advertisement_data = advertisement_schema.loads(advertisement_json)
         advertisement = AdvertisementModel(
             advertisement_data["user_id"],
+            advertisement_data["image_id"],
             advertisement_data["property_type"],
             advertisement_data["property_address"],
-            advertisement_data["geo_location"],
+            advertisement_data["longitude"],
+            advertisement_data["latitude"],
             advertisement_data["room_count"],
             advertisement_data["price"],
             advertisement_data["description"],
@@ -144,6 +132,7 @@ class PostAdvertisement(Resource):
             + "\n"
             + advertisement.user.email
         )
+        print(advertisement.adUser.id)
         return {"message": "Advertisement Successfully added"}, 200
 
 
@@ -176,9 +165,27 @@ class GetAdvertisementLists(Resource):
 
         return {"advertisement_list": advertisements_found}, 200
 
+    # @classmethod
+    # def get(cls):
+    #     latest_image = ImageModel.get_latest_images()
+    #     img = {
+    #         "image_1": latest_image.link_1,
+    #         "image_2": latest_image.link_2,
+    #         "image_3": latest_image.link_3,
+    #         "image_4": latest_image.link_4,
+    #         "image_5": latest_image.link_5,
+    #         "image_6": latest_image.link_6,
+    #         "image_7": latest_image.link_7,
+    #     }
+    #     return img
+
     @classmethod
-    def get(cls):
-        return make_response(render_template('form.html'))
+    def get(cls, image_id):
+        if AdvertisementModel.image_id == image_id:
+            image = AdvertisementModel.get_images_by_image_id(image_id)
+            return image, 200
+        else:
+            return {"Error_Message": "Image not found!!!"}, 404
 
 
 class GetSingleAdvertisement(Resource):
