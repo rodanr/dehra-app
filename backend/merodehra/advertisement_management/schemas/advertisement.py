@@ -19,7 +19,8 @@ class SearchAdvertisementSchema(ma.Schema):
 class ImageSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ImageModel
-        dump_only = ("id",)
+        dump_only = ("advertisement_id",)
+        include_fk = True
 
 
 class ChatUserSchema(ma.SQLAlchemyAutoSchema):
