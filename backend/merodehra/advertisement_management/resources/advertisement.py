@@ -1,6 +1,7 @@
 import datetime
 import json
-import os
+import os, shutil
+import dropbox
 from flask import request, make_response, render_template
 from sqlalchemy import desc
 from flask_restful import Resource
@@ -22,6 +23,9 @@ image_schema = ImageSchema()
 chat_user_schema = ChatUserSchema()
 chat_message_schema = ChatMessageSchema()
 
+dropbox_secret_key = "A2z-XnPHnM8AAAAAAAAAAe4U8vdm7L23Lq1QVC8SLFtM1dx5q2gKk9sH1JA65qy6"
+dbx = dropbox.Dropbox(dropbox_secret_key)
+
 ALLOWED_EXTENSION = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -34,7 +38,7 @@ def allowed_file(filename):
 class PostImages(Resource):
     @classmethod
     def post(cls):
-        uploaded_images = request.files.getlist("photo[]")
+        uploaded_images = request.files.getlist("photo")
         print(uploaded_images)
         img = []
         for image in uploaded_images:
@@ -51,7 +55,23 @@ class PostImages(Resource):
                 img.append(newfilename)
                 print(image_path)
                 image.save(image_path)
-        print(img)
+                with open(image_path,'rb') as f:
+                    dbx.files_upload(f.read(), "/Apps/dehra/"+newfilename)
+                result = dbx.files_get_temporary_link("/Apps/dehra/"+newfilename)
+                print(result.link)
+        for filename in os.listdir(IMAGE_UPLOAD_FOLDER):
+            file_path = os.path.join(IMAGE_UPLOAD_FOLDER, filename)
+            try:
+                if(os.path.isfile(file_path) or os.path.islink(file_path)):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print("Failed to delete %s. Reason: %s" % (file_path, e))
+
+        if(len(img) < 7):
+            for i in range(0,7-len(img)):
+                img.append(None)
 
         ad_image = ImageModel(
             img[0],
@@ -181,8 +201,16 @@ class GetAdvertisementLists(Resource):
 
     @classmethod
     def get(cls, image_id):
-        if AdvertisementModel.image_id == image_id:
-            image = AdvertisementModel.get_images_by_image_id(image_id)
+        image = AdvertisementModel.get_images_by_image_id(image_id)
+        image_link={}
+        if not image == None:
+            for i in image:
+                if i == "ad_user_id":
+                    image_link[i] = image[i]
+                if not i == "ad_user_id" and not image[i]==None:
+                    result = dbx.files_get_temporary_link("/Apps/dehra/"+image[i])
+                    image_link[i] = result.link
+            print(image_link)
             return image, 200
         else:
             return {"Error_Message": "Image not found!!!"}, 404

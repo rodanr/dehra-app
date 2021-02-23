@@ -19,12 +19,12 @@ from advertisement_management.resources.advertisement import (
     PostImages,
 )
 
-HEROKU_POSTGRES_URL = "postgres://aculeptjtivfxw:f59a97935e203b20e111d3494275b3a2ba3285a09b5aeb67fd43799a80a5e997@ec2-54-164-134-207.compute-1.amazonaws.com:5432/dfsk7g8tc3sgvn"
+HEROKU_POSTGRES_URL = "postgres://crrqlclpqraedq:3a8744fb85dcaa0e6b2bf9fdbef27a22c916671d400786c1524e17e82d2289f3@ec2-52-203-27-62.compute-1.amazonaws.com:5432/d4fs3rd4i5geb"
 TEST_DATABASE_SQL_LITE_URL = "sqlite:///data.db"
 app = Flask(__name__, template_folder="template")
 api = Api(app)
-app.secret_key = "bishwas76"
-app.config["SQLALCHEMY_DATABASE_URI"] = TEST_DATABASE_SQL_LITE_URL
+app.secret_key = "98dcbaf56c454862931c9b97ea8bdce0"
+app.config["SQLALCHEMY_DATABASE_URI"] = HEROKU_POSTGRES_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 ma.init_app(app)
