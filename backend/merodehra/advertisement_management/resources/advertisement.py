@@ -248,7 +248,7 @@ class PostChatId(Resource):
                 room_id = ChatMessageModel.get_room_id(user_id)
                 return {"room_id": room_id}, 200
         else:
-            return {"message": "Database is empty!!!"}, 404
+            return {"message": "Sorry, Database is empty!!!"}, 404
 
     @classmethod
     def get(cls, room_id):
@@ -262,7 +262,7 @@ class PostChatId(Resource):
                 # print(msg)
                 return msg, 200
         else:
-            return {"message": "Database is empty!!!"}, 404
+            return {"message": "Sorry, Database is empty!!!"}, 404
 
 
 class ChatMessage(Resource):
@@ -291,4 +291,4 @@ class ChatMessage(Resource):
             # print(message_found)
             return message_found, 200
         else:
-            return {"message": "Database is empty!!!"}, 404
+            return {"message": "Sorry, Database is empty!!!"}, 404
